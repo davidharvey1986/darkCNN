@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 
-# Pickles in the directory
+# Select files and folders in the directory
 src/pickles
 src/*.log
+src/*~
