@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# Pickles in the directory
+src/pickles
+src/*.log
