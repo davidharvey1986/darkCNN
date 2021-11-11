@@ -1,6 +1,83 @@
 from globalVariables import *
 import inceptionModules
 
+def simpleModel( imageShape, nClasses=4, learning_rate=5e-6, dropout=0., \
+                finalLayer=64, momentum=0.9, name='CNN',maxPool=True, globalAv=False, nAttributes=0 ):
+    
+    '''
+    This sets up the CNN model. I use the example from the tnesor flow website. But will need 
+    adapting and changing
+    
+    Currently it is a CNN clasification problem using 3 convolutional layers, two max pooling
+    two dense fully connected layers that do the meat of the training.
+    
+    The fitting is a softmax 
+    
+    
+    '''
+
+ 
+    inputLayer = Input(shape=imageShape)
+    
+    #Add in a convolutional layer, with 32 filters, that have weights randomly initialised to be learnt. 
+    #The kernel size is (3,3) and the activation is relu = max(1,x)
+    model = layers.Conv2D(32, (3, 3), activation='relu')(inputLayer)
+    model = layers.BatchNormalization(momentum=momentum)(model)
+    #Then it is max pooled from a 2x2 receptive field
+    model = layers.MaxPooling2D((2, 2))( model )
+    #Then it is convolved using 64 filters and a 3x3 kernel, ahain with the activation max(0,x)
+    model = layers.Conv2D(64, (3, 3), activation='relu')(model)
+    model = layers.BatchNormalization(momentum=momentum)(model)
+    
+    #Max pooled again
+    if maxPool:
+        model = layers.MaxPooling2D((2, 2))(model)
+        model = layers.Conv2D(64, (3, 3), activation='relu')(model)
+        model = layers.BatchNormalization(momentum=momentum)(model)
+    if globalAv:
+        model = layers.GlobalAveragePooling2D( )( model )
+        model = layers.BatchNormalization(momentum=momentum)(model)
+
+   
+    
+    model = layers.Flatten()(model)
+ 
+    #Then we go in to standard neural network with a fully connected layer to a layer 
+    #of 64 neurons and a max(x, 0) activation
+    model = layers.Dense(finalLayer, activation='relu')(model)
+
+    #Then another fully connected layer to 10 output neurons, for a classifer this last
+    #layer should have the output of the number of class names
+    
+
+
+
+        
+    if nAttributes > 0:
+        redshiftLayer = Input( shape=(nAttributes,))
+        redshiftModel = layers.Dense(finalLayer, activation='relu')(redshiftLayer)
+        #redshiftModel = layers.Dense(finalLayer, activation='relu')(redshiftModel)
+
+        model = layers.concatenate([model, redshiftModel])
+        allInputLayers.append(redshiftLayer )
+  
+
+    model = layers.Dense(finalLayer, activation='relu')(model)
+
+    model = layers.Dropout( dropout )( model)   
+    model = layers.Dense(nClasses)(model)
+        
+    finalModel = Model(inputLayer, model, name='mainModel')
+    
+    
+    optimizer = tf.keras.optimizers.Adam( learning_rate=learning_rate)
+
+    finalModel.compile(optimizer=optimizer,
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])    
+    
+        
+    return finalModel
 
 def mainModel(imageShape, dropout=0.2, momentum=0.9, nClasses=4, learning_rate=5e-6):
     '''

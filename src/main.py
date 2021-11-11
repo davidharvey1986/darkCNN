@@ -1,7 +1,7 @@
 #!/data2/harvey/tensorflow/bin/python
 
 
-from mainModel import mainModel
+from mainModel import mainModel, simpleModel
 from globalVariables import *
 from keras.callbacks import CSVLogger
 
@@ -29,8 +29,13 @@ def main( nEpochs=20, testTrainSplit=0.15,\
     
     
     if fileRootName is None:
-        fileRootName = "pickles/augmentedTrain_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
-        (nChannels,dropout,testTrainSplit)
+        #fileRootName = "pickles/augmentedTrain_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
+        #(nChannels,dropout,testTrainSplit)
+        
+        fileRootName = "pickles/simpleModel_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
+            (nChannels,dropout,testTrainSplit)
+        
+        
         
     print("All files saved to %s" % fileRootName)  
     
@@ -46,7 +51,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         (train_images, att_train, train_labels), testSets = \
             getData( binning=20, testTrainSplit=testTrainSplit,  \
                     indexFileRoot='pickles/testIndexes_%i' % (iMonteCarlo), \
-                     nChannels=nChannels, models=['CDM','SIDM0.1','SIDM0.3'])
+                     nChannels=nChannels)
         print("Number of channels is %i" % train_images.shape[-1])
         #Sort the test labels in to a stack
         test_labels, test_images = None, None
@@ -57,9 +62,6 @@ def main( nEpochs=20, testTrainSplit=0.15,\
             else:
                 test_labels = np.vstack((test_labels, testSets[i]['labels']))
                 test_images = np.vstack((test_images, testSets[i]['images']))
-            
-        
-        
            
         augmentedTrain, augmentedLabels = augmentData( train_images, train_labels)
     
@@ -69,7 +71,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
             print("FOUND PREVIOUS MODEL, LOADING...")
             mertensModel = models.load_model(modelFile)
         else:
-            mertensModel = mainModel( train_images[0].shape, dropout=dropout )
+            mertensModel = simpleModel( train_images[0].shape, dropout=dropout )
             
         mertensModel.summary()
         #Set up some logging for the model
@@ -89,6 +91,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         
     
         print("Starting from epoch %i" % initial_epoch)
+        
         checkpoint_dir = os.path.dirname(checkpoint_path)
 
         # Create a callback that saves the model's weights

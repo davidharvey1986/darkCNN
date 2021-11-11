@@ -49,7 +49,7 @@ def augmentData( train_images, train_labels, flip=True, nRotations=10):
             rotAngle = np.random.uniform(0, 360)
             
             if flip:
-                if np.random.uniform(0,1) > 0.5
+                if np.random.uniform(0,1) > 0.5:
                     flippedImage = train_images[iImage, :,:, :]
                 else:
                     flippedImage = train_images[iImage, ::-1,:, :]
@@ -61,7 +61,7 @@ def augmentData( train_images, train_labels, flip=True, nRotations=10):
                     
                 rotatedImage = rotate(flippedImage[:,:,iChannel], rotAngle)
                 centralPix = rotatedImage.shape[0]//2
-                croppedImage = 
+                croppedImage = \
                     rotatedImage[centralPix - imageSize // 2 : centralPix + imageSize // 2,\
                                  centralPix - imageSize // 2 : centralPix + imageSize // 2 ]
                         

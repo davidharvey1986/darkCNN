@@ -8,7 +8,8 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
             dynamic='all', xrayConcLim=0.2,                          \
             attributes = ['redshift', 'mass'], massCut=0,            \
             indexFileRoot = 'pickles/testIndexes',                   \
-            nChannels = 1):
+            nChannels = 1,                                           \
+            simulationNames = ['CDM','SIDM0.1','SIDM0.3','SIDM1']):
     
     '''
     OBJECTIVE
@@ -44,16 +45,17 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
     - xrayConcLim : float : the limit separation for the dynamiic state of a cluster
     - nChannels :  float : number of channels to be read, 1, 2, 3 : total matter, xray, baryonic
     - attributes : a list of M attributes to be returned with the training and test sets
+    - simulationNames : a list of the names of simulations I want to return
     
     returns : tuple : Tuple of the (N x training images, numpy array of N x M attritues, N training labels),
                 dictionary of test sets for each dark matter model, with J test clusters with their attrbutes and 
                 labels
     '''
     if allDataFile is None:
-        allDataFile = '../examples/pickles/allSimData_binning_%i.pkl' % binning
+        allDataFile = '../../examples/pickles/allSimData_binning_%i.pkl' % binning
     
     if not os.path.isfile( allDataFile ):
-        raise ValueError( "cant find data file, run rebinAllData.py")
+        raise ValueError( "Cant find data file %s, run rebinAllData.py" % allDataFile)
         
     allDataParams, images = pkl.load(open(allDataFile, 'rb'))
 
@@ -65,10 +67,9 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
     
     selectGalaxy = np.zeros(len(allDataParams['label']))
     
-    for i in redshifts:
-        selectGalaxy[ (i == allDataParams['redshift']) & (allDataParams['mass'] > massCut) ] = 1
+    selectGalaxy[ (allDataParams['mass'] > massCut) ] = 1
 
-    for i in models:
+    for i in simulationNames:
         modelMatch = np.array([ i in iSim for iSim in allDataParams['sim']])
         selectGalaxy[ modelMatch ] += 1
     
@@ -94,14 +95,12 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
     for iLabel in labelClasses:
         
         getLabelIndex = np.where(  labels == iLabel )
-        
-        print(len(getLabelIndex[0]))
-        
+                
         nTest = np.int(testTrainSplit*len(getLabelIndex[0]))
         
         indexFile = "%s_%0.3f_%s_%i.pkl" % (indexFileRoot,testTrainSplit,iLabel,binning)
 
-        print("nTests is %i" % nTest)
+        print("Number of Samples in the Test Set is %i" % nTest)
         
         if os.path.isfile(indexFile):
             testIndexes = pkl.load( open( indexFile, 'rb'))
