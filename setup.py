@@ -5,8 +5,6 @@ from setuptools import setup,Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 
-import numpy
-
 long_description = """\
 darkCNN
 """
@@ -35,5 +33,5 @@ setup   (       name            = "darkCNN",
                 scripts         = ['scripts/darkCNN'],
                 url = 'https://github.com/davidharvey1986/darkCNN', # use the URL to the github repo
                 download_url = 'https://github.com/davidharvey1986/darkCNN/archive/'+version+'.tar.gz',
-                install_requires=['tensorFlow==2.4.1', 'astropy==4.0', 'pickle', 'matplotlib==3.3.3', 'scipy=1.4.1'],
+                install_requires=['numpy','tensorFlow==2.4.1', 'astropy==4.0', 'pickle', 'matplotlib==3.3.3', 'scipy=1.4.1'],
         )
