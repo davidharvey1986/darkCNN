@@ -16,7 +16,6 @@ INCDIRS=['.']
 
 packages = ['darkCNN']
 package_dir = {'darkCNN':'./src'}
-package_data = {'darkCNN':'../databases/*.pkl'}
 
 
 
