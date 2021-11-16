@@ -48,22 +48,14 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         
         #Get the training and test labels that will be required.
         #nTest is teh number of tets PER CROSS SECTION
-        (train_images, att_train, train_labels), testSets = \
+        trainingSet, testSet = \
             getData( binning=20, testTrainSplit=testTrainSplit,  \
                     indexFileRoot='pickles/testIndexes_%i' % (iMonteCarlo), \
                      nChannels=nChannels)
-        print("Number of channels is %i" % train_images.shape[-1])
-        #Sort the test labels in to a stack
-        test_labels, test_images = None, None
-        for i in testSets.keys():
-            if test_labels is None:
-                test_images = testSets[i]['images']
-                test_labels = testSets[i]['labels']
-            else:
-                test_labels = np.vstack((test_labels, testSets[i]['labels']))
-                test_images = np.vstack((test_images, testSets[i]['images']))
+        
+        print("Number of channels is %i" % trainingSet["images"].shape[-1])
            
-        augmentedTrain, augmentedLabels = augmentData( train_images, train_labels)
+        augmentedTrain, augmentedLabels = augmentData( trainingSet['images'], trainingSet['label'])
     
         #Check to see if a previous model exists to continue training off
         
@@ -71,9 +63,10 @@ def main( nEpochs=20, testTrainSplit=0.15,\
             print("FOUND PREVIOUS MODEL, LOADING...")
             mertensModel = models.load_model(modelFile)
         else:
-            mertensModel = simpleModel( train_images[0].shape, dropout=dropout )
+            mertensModel = simpleModel( augmentedTrain[0].shape, dropout=dropout )
             
         mertensModel.summary()
+        
         #Set up some logging for the model
         #This is a checkpoint to save along the way
     
@@ -105,7 +98,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         inceptionHistory = mertensModel.fit(augmentedTrain, 
               augmentedLabels,  
               epochs=nEpochs,
-              validation_data=(test_images, test_labels),
+              validation_data=(testSet["images"], testSet["label"]),
               initial_epoch=initial_epoch,
               callbacks=[cp_callback, csv_logger])  # Pass callback to training
 
