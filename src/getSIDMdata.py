@@ -1,4 +1,4 @@
-from globalVariables import *
+from .globalVariables import *
 from astropy.io import fits
 import glob
 

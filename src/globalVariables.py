@@ -5,7 +5,7 @@ import pickle as pkl
 import os
 from tensorflow.keras import layers, models, Input, Model
 import tensorflow as tf
-from getSIDMdata import getData
+from .getSIDMdata import getData
 
 
 #

@@ -1,4 +1,4 @@
-from globalVariables import *
+from .globalVariables import *
 
 
 
