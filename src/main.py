@@ -1,6 +1,6 @@
 from keras.callbacks import CSVLogger
 from .getSIDMdata import getData
-from mainModel import simpleModel, mainModel
+from .mainModel import simpleModel, mainModel
 
 def main( nEpochs=20, testTrainSplit=0.15,\
           fileRootName=None,\
