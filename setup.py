@@ -30,7 +30,7 @@ setup   (       name            = "darkCNN",
                 license         = 'MIT',
                 packages        = packages,
                 package_dir     = package_dir,
-                scripts         = ['scripts/darkCNN'],
+                scripts         = ['bin/darkCNN'],
                 url = 'https://github.com/davidharvey1986/darkCNN', # use the URL to the github repo
                 download_url = 'https://github.com/davidharvey1986/darkCNN/archive/'+version+'.tar.gz',
                 install_requires=['numpy','tensorFlow==2.4.1', 'astropy==4.0', 'pickle', 'matplotlib==3.3.3', 'scipy==1.4.1'],
