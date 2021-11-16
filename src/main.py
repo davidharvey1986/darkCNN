@@ -23,6 +23,9 @@ def main( nEpochs=20, testTrainSplit=0.15,\
     
     '''
     
+    #Check for the directory "pickles"
+    if not os.path.isdir( "pickles "):
+        os.system("mkdir pickles")
     
     if fileRootName is None:
         #fileRootName = "pickles/augmentedTrain_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
