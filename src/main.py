@@ -74,8 +74,12 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         #Check to see if the previous csv logger exists, since i will want to continue
         #Number the training from the previous state
         if os.path.isfile( csv_file ):
-            previousEpochs = np.loadtxt( csv_file, delimiter=',',skiprows=1 )
-            initial_epoch = previousEpochs.shape[0]
+            try:
+                previousEpochs = np.loadtxt( csv_file, delimiter=',',skiprows=1 )
+                initial_epoch = previousEpochs.shape[0]
+            except:
+                #this means the file was created but nothing is in there
+                initial_epoch = 0
         else:
             initial_epoch = 0
         
