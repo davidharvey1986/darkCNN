@@ -48,7 +48,7 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
                 labels
     '''
     if allDataFile is None:
-        allDataFile = '../../examples/pickles/allSimData_binning_%i.pkl' % binning
+        allDataFile = '../databases/examplesCNN.pkl'
     
     if not os.path.isfile( allDataFile ):
         raise ValueError( "Cant find data file %s, run rebinAllData.py" % allDataFile)
