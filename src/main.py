@@ -1,7 +1,5 @@
 from keras.callbacks import CSVLogger
 
-from augmentData import augmentData
-
 def main( nEpochs=20, testTrainSplit=0.15,\
           fileRootName=None,\
           nMonteCarlo=5, dropout=0.2, nChannels=3):
