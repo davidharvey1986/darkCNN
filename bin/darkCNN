@@ -5,7 +5,7 @@ import argparse
 
 description = "darkCNN"
 parser = argparse.ArgumentParser("darkCNN",description=description)
-parser.add_argument('-v','--version', action='version', version=pyRRG.__version__)
+parser.add_argument('-v','--version', action='version', version=darkCNN.__version__)
 
 
 args = parser.parse_args()
