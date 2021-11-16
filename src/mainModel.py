@@ -1,5 +1,5 @@
 from .globalVariables import *
-import .inceptionModules
+from .inceptionModules import *
 
 def simpleModel( imageShape, nClasses=4, learning_rate=5e-6, dropout=0., \
                 finalLayer=64, momentum=0.9, name='CNN',maxPool=True, globalAv=False, nAttributes=0 ):
