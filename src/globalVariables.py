@@ -1,6 +1,5 @@
 # Import necessary global variables and modules to be used
 import numpy as np
-from matplotlib import pyplot as plt
 import pickle as pkl
 import os
 from tensorflow.keras import layers, models, Input, Model
