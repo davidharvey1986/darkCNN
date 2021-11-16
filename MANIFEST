@@ -1,0 +1,8 @@
+src/augmentData.py
+src/getSIDMdata.py
+src/globalVariables.py
+src/inceptionModules.py
+src/__init__.py
+src/mainModel.py
+src/main.py
+src/tools.py
