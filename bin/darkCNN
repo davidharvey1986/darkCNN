@@ -26,5 +26,5 @@ darkCNN.main(  nEpochs=args.nEpochs, \
                fileRootName=args.fileRootName, \
                database=args.database, \
                nMonteCarlo=args.nMonteCarlo, \
-               dropout=args.dropout, \
+               dropout=args.dropOut, \
                nChannels=args.nChannels)
