@@ -2,7 +2,7 @@ from .globalVariables import *
 from astropy.io import fits
 import glob
 
-from tools import rebin
+from .tools import rebin
 
 def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
             attributes = ['redshift', 'mass'], massCut=0,            \
