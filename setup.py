@@ -1,4 +1,3 @@
-
 import sys,os,string,glob,subprocess
 
 from setuptools import setup,Extension
@@ -33,5 +32,5 @@ setup   (       name            = "darkCNN",
                 scripts         = ['bin/darkCNN'],
                 url = 'https://github.com/davidharvey1986/darkCNN', # use the URL to the github repo
                 download_url = 'https://github.com/davidharvey1986/darkCNN/archive/'+version+'.tar.gz',
-                install_requires=['numpy','tensorFlow', 'astropy', 'matplotlib','PyQt5','keras'],
+                install_requires=['numpy','tensorFlow', 'astropy==4.0', 'matplotlib','PyQt5','keras'],
         )
