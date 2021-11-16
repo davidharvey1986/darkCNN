@@ -10,5 +10,5 @@ parser.add_argument('-v','--version', action='version', version=darkCNN.__versio
 
 args = parser.parse_args()
 
-print(("Running darkCNN version %s" % pyRRG.__version__))
+print(("Running darkCNN version %s" % darkCNN.__version__))
 darkCNN.main()
