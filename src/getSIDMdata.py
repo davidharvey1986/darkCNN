@@ -95,7 +95,7 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
     allTestIndexes = np.array([])
     allIndexes = np.arange(images.shape[0]) 
     
-    for iLabel in labelClasses:
+    for labelIndex, iLabel in enumerate(labelClasses):
         
         getLabelIndex = np.where(  labels == iLabel )
                 
@@ -112,7 +112,11 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
 
         for iKey in dataParamsKeys:
             if iKey == 'images':
-                testSet[iKey] = np.append(testSet[iKey], images[testIndexes, :, :, :nChannels])       
+                if labelIndex == 0:
+                    testSet[iKey] =  images[testIndexes, :, :, :nChannels]
+                else:
+                    testSet[iKey] = np.vstack((testSet[iKey], images[testIndexes, :, :, :nChannels]))
+
             else:  
                 testSet[iKey] = np.append(testSet[iKey], allDataParams[iKey][testIndexes])
         

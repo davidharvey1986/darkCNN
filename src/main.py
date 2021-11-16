@@ -1,6 +1,3 @@
-#!/data2/harvey/tensorflow/bin/python
-
-
 from mainModel import mainModel, simpleModel
 from globalVariables import *
 from keras.callbacks import CSVLogger

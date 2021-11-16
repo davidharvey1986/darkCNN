@@ -1,0 +1,14 @@
+#!/usr/bin/env python3.7
+import sys
+import darkCNN
+import argparse
+
+description = "darkCNN"
+parser = argparse.ArgumentParser("darkCNN",description=description)
+parser.add_argument('-v','--version', action='version', version=pyRRG.__version__)
+
+
+args = parser.parse_args()
+
+print(("Running darkCNN version %s" % pyRRG.__version__))
+darkCNN.main()
