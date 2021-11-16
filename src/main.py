@@ -1,5 +1,3 @@
-from mainModel import mainModel, simpleModel
-from globalVariables import *
 from keras.callbacks import CSVLogger
 
 from augmentData import augmentData
