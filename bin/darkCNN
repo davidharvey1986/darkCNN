@@ -6,9 +6,25 @@ import argparse
 description = "darkCNN"
 parser = argparse.ArgumentParser("darkCNN",description=description)
 parser.add_argument('-v','--version', action='version', version=darkCNN.__version__)
+parser.add_argument('-d','--database', action='database', default='exampleCNN.pkl', type=str)
+parser.add_argument('-n','--nEpochs', action='nEpochs', default=20, type=int)
+parser.add_argument('-f','--fileRootName', action='fileRootName', default=None, type=str)
+parser.add_argument('-m','--nMonteCarlo', action='nMonteCarlo', default=5, type=int)
+parser.add_argument('-c','--nChannels', action='nChannels', default=3, type=int)
+parser.add_argument('-d','--dropOut', action='dropOut', default=0.2, type=float)
+parser.add_argument('-t','--testTrainSplit', action='testTrainSplit', default=0.15, type=float)
+
+
 
 
 args = parser.parse_args()
 
 print(("Running darkCNN version %s" % darkCNN.__version__))
-darkCNN.main()
+
+darkCNN.main(  nEpochs=args.nEpochs, \
+               testTrainSplit=args.testTrainSplit,\
+               fileRootName=args.fileRootName, \
+               database=args.database, \
+               nMonteCarlo=args.nMonteCarlo, \
+               dropout=args.dropout, \
+               nChannels=args.nChannels)

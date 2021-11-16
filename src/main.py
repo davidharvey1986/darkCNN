@@ -3,7 +3,7 @@ from .getSIDMdata import getData
 from .mainModel import simpleModel, mainModel
 
 def main( nEpochs=20, testTrainSplit=0.15,\
-          fileRootName=None,\
+          fileRootName=None, database=None, \
           nMonteCarlo=5, dropout=0.2, nChannels=3):
     '''
     The main function that trains the model 
@@ -19,6 +19,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
     - dropout : integer : the dropout rate of neurons in the network to avoid overfitting
     - nChannels : float : the number of channels of data to go in to the CNN. 
                         (1, 2, 3: total, xray, baryonic matter)
+    - database : string : the database of test and train samples.
     
     '''
     
@@ -46,7 +47,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         trainingSet, testSet = \
             getData( binning=20, testTrainSplit=testTrainSplit,  \
                     indexFileRoot='pickles/testIndexes_%i' % (iMonteCarlo), \
-                     nChannels=nChannels)
+                     nChannels=nChannels, allDataFile=database)
         
         print("Number of channels is %i" % trainingSet["images"].shape[-1])
            
