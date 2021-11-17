@@ -59,6 +59,13 @@ matplotlib == 3.3.3
 os
 scipy == 1.4.1
 
+Example
+--------
+To run the example, enter the directory and simply type
+darkCNN
+
+Then to run the jupyter-lab notebook ensure to add the virtual environment kernel via
+ipython kernel install --name "darkCNN" --user
 
 
 
