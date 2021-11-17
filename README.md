@@ -61,6 +61,8 @@ scipy == 1.4.1
 
 Example
 --------
+Make sure that jupyter-lab is installed on the venv via
+pip install jupyterlab
 To run the example, enter the directory and simply type
 darkCNN
 
