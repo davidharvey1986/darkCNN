@@ -27,10 +27,20 @@ This data cube is binned in to 10 kpc resolution pixels, resulting in maps of 20
 Dark matter self-interactions are rotationally symmetric so augmentations rotating and flipping can artificially increase the sample. This is carried out with
 10 rotations and a random flipping of the image. 
 
+To Install - Testsed on Fedora 33, Mac OS X Big Sur with python 3.7
+----------
+#setup a virtual environment
+>> virtualenv darkCNN -p /usr/local/bin/python3.7 
+in the root type
+>> python setup.py install
+
+To run the unit tests run
+>> python setup.py test
+
 To Run
 -------
 Make sure the python interpreter in main.py is correct. 
-./main.py
+darkCNN -h #to bring up the help
 
 Python Modules
 --------------
