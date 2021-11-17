@@ -2,7 +2,7 @@ from .globalVariables import *
 
 from scipy.ndimage import rotate
 
-def augmentData( train_images, train_labels, flip=True, nRotations=10):
+def augmentData( train_images, train_labels, flip=True, nRotations=10, fixedRotation=None):
     '''
     OBJECTIVE
     ---------
@@ -26,6 +26,7 @@ def augmentData( train_images, train_labels, flip=True, nRotations=10):
     ------------------
     flip : If true randomly flip the image before rotating
     nRotations : the number of random rotations of an image I carry out
+    fixedRotation : None or float : if None then use a random rotation, otherwise use float
     
     RETURNS
     -------
@@ -46,8 +47,11 @@ def augmentData( train_images, train_labels, flip=True, nRotations=10):
             
         
         for iRotation in range(nRotations):
-            rotAngle = np.random.uniform(0, 360)
-            
+            if fixedRotation is None:
+                rotAngle = np.random.uniform(0, 360)
+            else:
+                rotAngle = fixedRotation
+                
             if flip:
                 if np.random.uniform(0,1) > 0.5:
                     flippedImage = train_images[iImage, :,:, :]

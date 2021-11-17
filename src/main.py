@@ -97,7 +97,6 @@ def main( nEpochs=20, testTrainSplit=0.15,\
                                                  save_weights_only=True,
                                                  verbose=1)
     
-
         
         # Train the model with the new callback
         inceptionHistory = mertensModel.fit(augmentedTrain, 

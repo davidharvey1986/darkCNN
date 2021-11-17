@@ -14,7 +14,7 @@ version='0.0.1'
     
 INCDIRS=['.']
 
-packages = ['darkCNN']
+packages = ['darkCNN', 'unittests']
 package_dir = {'darkCNN':'./src'}
 
 
@@ -30,4 +30,5 @@ setup   (       name            = "darkCNN",
                 url = 'https://github.com/davidharvey1986/darkCNN', # use the URL to the github repo
                 download_url = 'https://github.com/davidharvey1986/darkCNN/archive/'+version+'.tar.gz',
                 install_requires=['tensorFlow', 'astropy==4.0', 'matplotlib==3.3.3','PyQt5','keras','scipy'],
+                 test_suite="unittests",
         )
