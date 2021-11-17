@@ -41,7 +41,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         
     print("All files saved to %s" % fileRootName)  
     
-    for iMonteCarlo in range(1, nMonteCarlo):
+    for iMonteCarlo in range(1, nMonteCarlo+1):
         
         modelFile = "%s_%i.h5" % (fileRootName, iMonteCarlo)
         csv_file = '%s_%i.csv' % (fileRootName, iMonteCarlo)
@@ -49,7 +49,6 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         
         
         #Get the training and test labels that will be required.
-        #nTest is teh number of tets PER CROSS SECTION
         trainingSet, testSet = \
             getData( binning=20, testTrainSplit=testTrainSplit,  \
                     indexFileRoot='pickles/testIndexes_%i' % (iMonteCarlo), \
