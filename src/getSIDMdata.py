@@ -137,6 +137,8 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
     trainingSet['label'] = trainingSet['label'][:, np.newaxis]
     testSet['label'] = testSet['label'][:, np.newaxis]
                  
+
+        
     return trainingSet, testSet    
     
        

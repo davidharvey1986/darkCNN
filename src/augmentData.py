@@ -66,8 +66,8 @@ def augmentData( train_images, train_labels, flip=True, nRotations=10):
                                  centralPix - imageSize // 2 : centralPix + imageSize // 2 ]
                         
                 if croppedImage.shape != (imageSize,imageSize):
-                    raise ValueError("Shape not correct (%i,%i) from rotation %0.3f" %\
-                                         ( croppedImage.shape[0], croppedImage.shape[0],rotAngle))
+                    raise ValueError("Shape not correct (%i,%i) from rotation %0.3f (%i, %i)" %\
+                                         ( croppedImage.shape[0], croppedImage.shape[0],rotAngle, imageSize, imageSize))
                         
                 if iChannel == 0:
                     finalImage = croppedImage
@@ -84,4 +84,10 @@ def augmentData( train_images, train_labels, flip=True, nRotations=10):
     
     newLabels = allRotatedLabels[:,np.newaxis]
     
+    
+    #if only one channel, then it will remove it
+    if train_images.shape[-1] == 1:
+        allRotatedImages = allRotatedImages[:,:,:,np.newaxis]
+        
+        
     return allRotatedImages, newLabels

@@ -18,10 +18,6 @@ packages = ['darkCNN']
 package_dir = {'darkCNN':'./src'}
 
 
-
-
-
-
 setup   (       name            = "darkCNN",
                 version         = version,
                 author          = "David Harvey",

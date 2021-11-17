@@ -27,7 +27,7 @@ def main( nEpochs=20, testTrainSplit=0.15,\
     '''
     
     #Check for the directory "pickles"
-    if not os.path.isdir( "pickles "):
+    if not os.path.isdir("pickles"):
         os.system("mkdir pickles")
     
     if fileRootName is None:
