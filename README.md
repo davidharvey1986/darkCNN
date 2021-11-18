@@ -18,7 +18,7 @@ There are four dark matter models:
 
 Each with four redshift slices: z = 0., 0.125, 0.250, 0.375 
 
-This data cube is binned in to 10 kpc resolution pixels, resulting in maps of 200 x 200 pixels. Each map comes with auxillary data or "attributes", consisting of
+For this example, the data cube is binned in to 40 kpc resolution pixels, resulting in maps of 50 x 50 pixels. Each map comes with auxillary data or "attributes", consisting of
 1. Redshift
 2. Cluster mass
 3. Xray concentration ( equal to S(<100 kpc) / S(<400 kpc) )
