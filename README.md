@@ -32,10 +32,15 @@ To Install - Testsed on Fedora 33, Mac OS X Big Sur with python 3.7
 ----------------------------------------------------------------------
 #setup a virtual environment
 >> virtualenv darkCNN -p /usr/local/bin/python3.7 
+>> 
 >> cd darkCNN
+>> 
 >> source bin/activate
+>> 
 >> git clone https://github.com/davidharvey1986/darkCNN.git
+>> 
 >> cd darkCNN
+>> 
 >> python setup.py install
 
 To run the unit tests run
