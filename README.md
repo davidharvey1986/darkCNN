@@ -28,7 +28,7 @@ Dark matter self-interactions are rotationally symmetric so augmentations rotati
 
 Note that the example database that has been packaged with this is a subset of al the data.
 
-To Install - Testsed on Fedora 33, Mac OS X Big Sur with python 3.7
+To Install - Tested on Fedora 33, Mac OS X Big Sur with python 3.7
 ----------------------------------------------------------------------
 #setup a virtual environment
 >> virtualenv darkCNN -p /usr/local/bin/python3.7 
