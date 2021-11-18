@@ -48,7 +48,7 @@ To run the unit tests run
 
 To Run
 -------
-darkCNN -h #to bring up the help
+>> darkCNN -h #to bring up the help
 
 Example (included in package)
 --------------------------------
