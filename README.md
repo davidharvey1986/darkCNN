@@ -54,7 +54,9 @@ Example (included in package)
 --------------------------------
 Make sure that jupyter-lab is installed on the venv via
 >> pip install jupyterlab
+>> 
 To run the example, enter the "example" directory and simply type
+>> 
 >> darkCNN
 
 Then to run the jupyter-lab notebook ensure to add the virtual environment kernel via
