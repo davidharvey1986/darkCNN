@@ -1,7 +1,6 @@
 # darkCNN
 A convolutional neural network to constrain dark matter
 
-
 The objective of this algorithm is to take in simulated data, augment it and then train a convolutional neural network with multiple channels to estimate the model of dark matter it came from.
 
 This has been run and tested in a virtual environment, which it is highly recommended carried out.
@@ -27,11 +26,16 @@ This data cube is binned in to 10 kpc resolution pixels, resulting in maps of 20
 Dark matter self-interactions are rotationally symmetric so augmentations rotating and flipping can artificially increase the sample. This is carried out with
 10 rotations and a random flipping of the image. 
 
+Note that the example database that has been packaged with this is a subset of al the data.
+
 To Install - Testsed on Fedora 33, Mac OS X Big Sur with python 3.7
-----------
+----------------------------------------------------------------------
 #setup a virtual environment
 >> virtualenv darkCNN -p /usr/local/bin/python3.7 
-in the root type
+>> cd darkCNN
+>> source bin/activate
+>> git clone https://github.com/davidharvey1986/darkCNN.git
+>> cd darkCNN
 >> python setup.py install
 
 To run the unit tests run
@@ -39,8 +43,17 @@ To run the unit tests run
 
 To Run
 -------
-Make sure the python interpreter in main.py is correct. 
 darkCNN -h #to bring up the help
+
+Example (included in package)
+--------------------------------
+Make sure that jupyter-lab is installed on the venv via
+>> pip install jupyterlab
+To run the example, enter the "example" directory and simply type
+>> darkCNN
+
+Then to run the jupyter-lab notebook ensure to add the virtual environment kernel via
+ipython kernel install --name "darkCNN" --user
 
 Python Modules
 --------------
@@ -50,35 +63,17 @@ globalVariables.py : standarised modules required
 inceptionModules.py : the inception layers for the main model
 main.py : the main modules that trains and saves the models
 mainModel.py : contains two models : mainModel - from the Merten paper, and a simple model
-tools.py
-
-Notebooks
----------
-testModel.ipynb : a
-
+tools.py : a distribution of tools used in the suite of code
 
 Requirements
 --------------
 Python == 3.7
-Tensorflow == 2.4.1
-Keras  == 2.4.0
-astropy == 4.0
-pickle
-numpy == 1.19.5
-matplotlib == 3.3.3
-os
-scipy == 1.4.1
-
-Example
---------
-Make sure that jupyter-lab is installed on the venv via
-pip install jupyterlab
-To run the example, enter the directory and simply type
-darkCNN
-
-Then to run the jupyter-lab notebook ensure to add the virtual environment kernel via
-ipython kernel install --name "darkCNN" --user
-
+tensorFlow
+astropy==4.0
+matplotlib==3.3.3
+OyQt5
+keras
+scipy
 
 
 
