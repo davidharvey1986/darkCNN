@@ -2,6 +2,7 @@
 import sys
 import darkCNN
 import argparse
+print(("Running darkCNN version %s" % darkCNN.__version__))
 
 description = "darkCNN"
 parser = argparse.ArgumentParser("darkCNN",description=description)
@@ -10,21 +11,21 @@ parser.add_argument('-d','--database', help='database', default='exampleCNN.pkl'
 parser.add_argument('-n','--nEpochs', help='nEpochs', default=20, type=int)
 parser.add_argument('-f','--fileRootName', help='fileRootName', default=None, type=str)
 parser.add_argument('-m','--nMonteCarlo', help='nMonteCarlo', default=5, type=int)
-parser.add_argument('-c','--nChannels', help='nChannels', default=3, type=int)
+parser.add_argument('-c','--channels', help='Channels in a string separated by commas',
+                    default=['total'], nargs="*", type=str)
 parser.add_argument('-o','--dropOut', help='dropOut', default=0.2, type=float)
-parser.add_argument('-t','--testTrainSplit', help='testTrainSplit', default=0.15, type=float)
-
-
+parser.add_argument('-t','--train_split', help='train_split', default=0.85, type=float)
+parser.add_argument('-a','--attributes', help='Attributes in a string separated by commas',
+                    default=[], nargs='*', type=str)
 
 
 args = parser.parse_args()
 
-print(("Running darkCNN version %s" % darkCNN.__version__))
-
 darkCNN.main(  nEpochs=args.nEpochs, \
-               testTrainSplit=args.testTrainSplit,\
+               train_split=args.train_split,\
                fileRootName=args.fileRootName, \
                database=args.database, \
                nMonteCarlo=args.nMonteCarlo, \
                dropout=args.dropOut, \
-               nChannels=args.nChannels)
+               channels=args.channels, \
+               attributes=args.attributes)

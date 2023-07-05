@@ -1,14 +1,20 @@
 from .globalVariables import *
 from astropy.io import fits
 import glob
+from scipy.signal import correlate2d
+import tqdm
+from keras.preprocessing.image import ImageDataGenerator
+from sklearn.model_selection import train_test_split
 
-from .tools import rebin
 
-def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
-            attributes = ['redshift', 'mass'], massCut=0,            \
-            indexFileRoot = 'pickles/testIndexes',                   \
-            nChannels = 1,                                           \
-            simulationNames = ['CDM','SIDM0.1','SIDM0.3','SIDM1']):
+       
+def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
+            attributes = [], massCut=0,            \
+            channels = ['total'],                                           \
+            simulationNames = ['CDM','SIDM0.1','SIDM0.3','SIDM1'],\
+            random_state=42, augment_data=False, shuffle_data=False, batch_size=32, 
+            crop_data=False, zoom=False, contrast=False, correlations=None, rescale=1., 
+            resize=None, renorm='max', DMO=False, verbose=False, data_labels=None, return_test_params=False ):
     
     '''
     OBJECTIVE
@@ -37,128 +43,148 @@ def getData( testTrainSplit = 0.3, binning = 20, allDataFile = None, \
     - binning : integer : the binning of the maps from the raw data to be used. This only goes
                            in to the string of the filename that has already analysed the maps
     - allDataFile : string : the data file with all the clusters pre-reduced in. If None, use the default
-    - indexFileRoot : i will need to store the indexes for the test set so when i loadthe data and models,
-                      it remembers which clusters were train and which were test.
-    - nChannels :  float : number of channels to be read, 1, 2, 3 : total matter, xray, baryonic
-    - attributes : a list of M attributes to be returned with the training and test sets
+
+    - channels : list : can be any combination of the following ['total','xray','stellar']
+    - attributes : a list of M attributes to be returned with the training and test sets e.g. ['redshift', 'mass']
     - simulationNames : a list of the names of simulations I want to return
     
     returns : tuple : Tuple of the (N x training images, numpy array of N x M attritues, N training labels),
                 dictionary of test sets for each dark matter model, with J test clusters with their attrbutes and 
                 labels
     '''
+    np.random.seed(random_state)
+    nChannels = len(channels)
+    nAttributes = len(attributes)
+    
+    if DMO:
+        if 'xray' in channels:
+            raise ValueError("Cannot get X-ray for DMO files")
+        channel_idxs = [ np.where( i == np.array(['total','stellar']))[0][0] for i in channels]    
+    else:
+        channel_idxs = [ np.where( i == np.array(['total','xray','stellar']))[0][0] for i in channels]    
+    
     if allDataFile is None:
-        allDataFile = 'examplesCNN.pkl'
+        allDataFile = 'pickles/allSimData_binning_20.pkl'
     
     if not os.path.isfile( allDataFile ):
         raise ValueError( "Cant find data file %s, run rebinAllData.py" % allDataFile)
         
-    allDataParams, images = pkl.load(open(allDataFile, 'rb'))
+    allDataParams, allImages = pkl.load(open(allDataFile, 'rb'))
     dataParamsKeys = list(allDataParams.keys())
     dataParamsKeys.append("images")            
-                         
+
+    
+    
+    
+    #Check the sims
+    data_class_names = np.unique( allDataParams['sim'])
+    falsehoods = []
+    for i in simulationNames:
+        falsehoods.append( ~np.any([i in j for j in data_class_names]) )
+    if np.any(falsehoods):
+        raise ValueError("Simulation %s not recognised, should be of %s" % \
+                         ( ', '.join(np.array(simulationNames)[falsehoods]), ', '.join(data_class_names)))
+    
+    
+    
+    
     #images is a list so make it an array
-    images = np.array(images)
+    allImages = np.array(allImages)*rescale
+    
+    if resize is not None:
+        print("rescaling with nearestr")
+        allImages = tf.image.resize(allImages, resize, method='nearest')
+       
+    images = np.stack([ allImages[:,:,:,i] for i in channel_idxs], axis=-1)
+    
+    if renorm == 'mean':
+        print(allImages.shape)
+        allImages = np.stack([ allImages[ i, :, :, j] - np.mean(allImages[ i, :, :, j]) 
+                           for i in np.arange(allImages.shape[0]) 
+                           for j in np.arange(allImages.shape[-1]) ])
+    
     
     for i in allDataParams.keys():
-        allDataParams[i] = np.array(allDataParams[i])
+        if i != 'lensing_norm':
+            allDataParams[i] = np.array(allDataParams[i])
     
     selectGalaxy = np.zeros(len(allDataParams['label']))
     
     selectGalaxy[ (allDataParams['mass'] > massCut) ] = 1
 
     for i in simulationNames:
-        modelMatch = np.array([ i in iSim for iSim in allDataParams['sim']])
+
+        if DMO:
+            modelMatch = np.array( [ i == iSim for iSim in allDataParams['sim']])
+        else:
+            modelMatch = np.array([ i+"+baryons" == iSim for iSim in allDataParams['sim']])
         selectGalaxy[ modelMatch ] += 1
     
     images = images[ selectGalaxy==2, :, :, :]
 
+    #[selectGalaxy==2]
     for i in allDataParams.keys():
-        allDataParams[i] = allDataParams[i][ selectGalaxy == 2 ]
+        if np.array(allDataParams[i]).shape[0] == 0:
+            continue
+        allDataParams[i] = np.array(allDataParams[i])[ selectGalaxy == 2 ]
         
-    labels = np.array(allDataParams['label'])
+    labels = np.array(allDataParams['sim'])
     labelClasses =  np.unique(labels)
     newLabels = np.zeros(labels.shape[0])
-    
+    if data_labels is None:
+        data_labels = np.arange(len(labelClasses))
+    else:
+        if len(data_labels) != len(labelClasses):
+            raise ValueError("Input data labels is not hte same length as the number of classes")
+            
     for i, iClass in enumerate(labelClasses):
-        newLabels[ labels == iClass ] = i
+        if verbose:
+            print("Number of %s (%i) class : %i" % (iClass, i, len(newLabels[ labels == iClass ])))
+        newLabels[ labels == iClass ] = data_labels[i]
         
 
-    #I need a training set that has nTest taken from each class so i can train one model and
-    #test over each scenario
-    testSet = {}
-    #initialise the different keys of the dict
-    for iKey in dataParamsKeys:
-        testSet[iKey] = np.array([])
-    
-    
-    allTestIndexes = np.array([])
-    allIndexes = np.arange(images.shape[0]) 
-    
-    for labelIndex, iLabel in enumerate(labelClasses):
         
-        getLabelIndex = np.where(  labels == iLabel )
+    if correlations is not None:
+        all_corrs = []
+        for iCorr in correlations:
+            corr1_idx = np.where( iCorr[0] == np.array(['total','xray','stellar']))[0][0] 
+            corr2_idx = np.where( iCorr[1] == np.array(['total','xray','stellar']))[0][0] 
+
+            corr_fct = []
+            im_idxs = np.arange(allImages.shape[0])[selectGalaxy==2]
+            
+            for i in tqdm.tqdm(im_idxs):
                 
-        nTest = np.int(testTrainSplit*len(getLabelIndex[0]))
+                corr_fct.append(correlate2d( allImages[i,:,:,corr1_idx],allImages[i,:,:,corr2_idx], mode='same')/100.)
+                
+            all_corrs.append( np.stack([ corr_fct ], axis=-1) )
+        corr_arr = np.concatenate( all_corrs, axis=-1)
         
-        indexFile = "%s_%0.3f_%s_%i.pkl" % (indexFileRoot, testTrainSplit, iLabel, binning)
+        images = np.concatenate([images, corr_arr], axis=-1)
+    if augment_data:
+        gen = ImageDataGenerator(horizontal_flip = True,
+                         vertical_flip = True,
+                         rotation_range = 360, fill_mode='reflect',interpolation_order=3 )
+    else:
+        gen = ImageDataGenerator(horizontal_flip = False,
+                         vertical_flip = False )
+        
 
-        
-        if os.path.isfile(indexFile):
-            testIndexes = pkl.load( open( indexFile, 'rb'))
-        else:
-            testIndexes = np.random.choice( getLabelIndex[0], replace=False, size=np.int(nTest) )
-            pkl.dump( testIndexes, open( indexFile, 'wb'))
-
-        for iKey in dataParamsKeys:
-            if iKey == 'images':
-                if labelIndex == 0:
-                    testSet[iKey] =  images[testIndexes, :, :, :nChannels]
-                else:
-                    testSet[iKey] = np.vstack((testSet[iKey], images[testIndexes, :, :, :nChannels]))
-
-            else:  
-                testSet[iKey] = np.append(testSet[iKey], allDataParams[iKey][testIndexes])
-        
-        allTestIndexes = np.append(allTestIndexes, testIndexes)
-        
-    print("Number of Samples in the Test Set is %i" % testSet["label"].shape)
-
-    trainingSet = {}
-    #all the training indexes are those that are not in the test indexes
-    trainIndexes = np.array( [ i for i in allIndexes if i not in allTestIndexes ])
-    for iAtt in dataParamsKeys:
-        if iAtt == 'images':
-            trainingSet[iAtt] = images[trainIndexes, :, :, :nChannels]    
-        else:
-            trainingSet[iAtt] = allDataParams[iAtt][trainIndexes]
-        
-    #Add an axis to the labels to conform to tensorflow.
-    trainingSet['label'] = trainingSet['label'][:, np.newaxis]
-    testSet['label'] = testSet['label'][:, np.newaxis]
-                 
-
-        
-    return trainingSet, testSet    
+    X_train, X_val, y_train, y_val = train_test_split(images, newLabels, test_size=1.-train_split, stratify=newLabels, random_state=random_state)  
     
-       
-        
-def getCrossSection( simName  ):
-    '''
-    Get the equivalent self-interaction cross-section
-    for a given simulation run
-    
-    '''
-    crossSections = \
-        {'CDM_low':0.,
-         'CDM_hi':0.,
-         'CDM':0., \
-         'SIDM1':1.,\
-         'SIDM0.1':0.1,\
-         'SIDM0.3':0.3 }
-    
-    return crossSections[simName]
+    train_gen = gen.flow( X_train, y_train, batch_size=batch_size )
 
-
-       
+    
+    
+    if return_test_params:
+        index_train, index_val, _, _ =  train_test_split(np.arange(images.shape[0]), newLabels, test_size=1.-train_split, stratify=newLabels, random_state=random_state)  
         
+        for i in allDataParams.keys():
+            allDataParams[i] = allDataParams[i][ index_val ]
+            
+        return train_gen, ( X_val,    y_val), allDataParams
+      
+    else:
+        return train_gen, ( X_val,    y_val)
+    
+    

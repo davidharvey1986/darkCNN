@@ -1,13 +1,13 @@
 from keras.callbacks import CSVLogger
-from .getSIDMdata import getData
-from .mainModel import simpleModel, mainModel
+from .getSIDMdata import get_tf_DataSet as getData
+from .mainModel import simpleModel, InceptionV4
 from .globalVariables import *
 from .augmentData import augmentData
 
 
-def main( nEpochs=20, testTrainSplit=0.15,\
-          fileRootName=None, database=None, \
-          nMonteCarlo=5, dropout=0.2, nChannels=3):
+def main( nEpochs=60, train_split=0.8,\
+          fileRootName=None, database=None, attributes=['redshift','mass'], \
+          nMonteCarlo=5, dropout=0.2, channels=['total','stellar']):
     '''
     The main function that trains the model 
     
@@ -34,13 +34,12 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         #fileRootName = "pickles/augmentedTrain_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
         #(nChannels,dropout,testTrainSplit)
         
-        fileRootName = "pickles/simpleModel_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
-            (nChannels,dropout,testTrainSplit)
+        fileRootName = "pickles/merten_arch"
         
         
         
     print("All files saved to %s" % fileRootName)  
-    
+    print("Using attributes: ", attributes)
     for iMonteCarlo in range(1, nMonteCarlo+1):
         
         modelFile = "%s_%i.h5" % (fileRootName, iMonteCarlo)
@@ -49,22 +48,32 @@ def main( nEpochs=20, testTrainSplit=0.15,\
         
         
         #Get the training and test labels that will be required.
-        trainingSet, testSet = \
-            getData( binning=20, testTrainSplit=testTrainSplit,  \
-                    indexFileRoot='pickles/testIndexes_%i' % (iMonteCarlo), \
-                     nChannels=nChannels, allDataFile=database)
         
-        print("Number of channels is %i" % trainingSet["images"].shape[-1])
-           
-        augmentedTrain, augmentedLabels = augmentData( trainingSet['images'], trainingSet['label'])
-    
+   
+        trainingSet, testSet = getData( augment_data=True, channels=channels, 
+                            attributes=attributes,  random_state=41+iMonteCarlo, 
+                                     train_split=train_split, allDataFile=database)
+        if len(attributes) > 0:
+            train_dataset_to_numpy = list(trainingSet.as_numpy_iterator())[0]
+            test_dataset_to_numpy = list(testSet.as_numpy_iterator())[0]
+
+        else:
+            train_dataset_to_numpy = list(trainingSet.as_numpy_iterator())
+            test_dataset_to_numpy = list(testSet.as_numpy_iterator())
+
+        inputShape = train_dataset_to_numpy[0][0].shape[1:]
+        nTrain = train_dataset_to_numpy[0][0].shape[0]
+        nTest = list(test_dataset_to_numpy)[0][0].shape[0]
+        print("Using %i training samples and %i test samples" % (nTrain, nTest))
         #Check to see if a previous model exists to continue training off
+        print("Input tensor shape is ", inputShape)
         
         if os.path.isfile(modelFile):
             print("FOUND PREVIOUS MODEL, LOADING...")
             mertensModel = models.load_model(modelFile)
         else:
-            mertensModel = simpleModel( augmentedTrain[0].shape, dropout=dropout )
+            mertensModel = InceptionV4(input_shape=test_set[0][0].shape, bn_momentum=.0,classes=num_classes,
+                                               feature_dropout=.33,num_layersA=1,num_layersB=1,num_layersC=1,leak=.03)
             
         mertensModel.summary()
         
@@ -99,10 +108,9 @@ def main( nEpochs=20, testTrainSplit=0.15,\
     
         
         # Train the model with the new callback
-        inceptionHistory = mertensModel.fit(augmentedTrain, 
-              augmentedLabels,  
+        inceptionHistory = mertensModel.fit(x=trainingSet,
               epochs=nEpochs,
-              validation_data=(testSet["images"], testSet["label"]),
+              validation_data=testSet,
               initial_epoch=initial_epoch,
               callbacks=[cp_callback, csv_logger])  # Pass callback to training
 
