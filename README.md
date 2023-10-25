@@ -83,6 +83,32 @@ keras
 scipy
 
 
+A few words on the data
+-----------------------
+
+>> params, images = pkl.load(open(data, "rb"))
+params is a dict
+images is a list
+
+Meta Data information:
+lensing_norm : numpy array of length N : the maximum value of the total matter map before normalisation
+label : numpy array of length N floats : The Value of the cross-section that cluster was simulated with, can be 0, 0.1, 0.3, 1.0, all velocity independent.
+redshift: numpy array of length N floats: redshift of the cluster in the simulation , can be 0, 0.125, 0.25 or 0.375.
+clusterID:  numpy array of length N strings / int : the Friends of Friends label of the cluster. Do not necessarily match between simulations
+mass: numpy array of length N floats : virial mass of the cluster
+galaxy_catalogue : a list of N elements, with each element a recarray containing a catalogue of the galaxies that are members of the cluster in question (each with differing number of galaxies ) , where the fields in the recarray are
+fof : string -> the clusterID
+x : float -> the relative position of the galaxy in the cluster in kpc
+y : float -> the relative position of the galaxy in the cluster in kpc
+z :float -> the relative position of the galaxy in the cluster in Mpc
+m200 : float : log total mass of the galaxy
+mstar_100 : float : log total stellar mass within 100 kpc of the galaxy
+BCG_stellar_conc : the ratio between total stellar mass < 30kpc / < 100kpc
+BCG_e1 & BCG_e2 : numpy array of length N : the two components of ellipticity of the central BCG, where total ellipticity = sqrt(e1^2+e2^2)
+xrayConc : numpy array of length N : the ratio between total xray emmissivity < 100kpc / < 400kpc -> where greater than 0.2 = relaxed, less than 0.2 = merging.
+xray_norm : numpy array of length N : the maximum value of the Xray emission map before normalisation
+
+
 
 
 
