@@ -5,16 +5,18 @@ from scipy.signal import correlate2d
 import tqdm
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
-
+from .add_noise import add_noise_to_images, get_einstein_radius
 
        
 def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
-            attributes = [], massCut=0,            \
+            attributes = [], massCut=0, dynamical_state='all',           \
             channels = ['total'],                                           \
             simulationNames = ['CDM','SIDM0.1','SIDM0.3','SIDM1'],\
             random_state=42, augment_data=False, shuffle_data=False, batch_size=32, 
             crop_data=False, zoom=False, contrast=False, correlations=None, rescale=1., 
-            resize=None, renorm='max', DMO=False, verbose=False, data_labels=None, return_test_params=False ):
+            resize=None, renorm='max', DMO=False, verbose=False, 
+            data_labels=None, return_test_params=False, meta_data=[], 
+            galaxy_member_lim=10, add_noise=None):
     
     '''
     OBJECTIVE
@@ -70,11 +72,12 @@ def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
         raise ValueError( "Cant find data file %s, run rebinAllData.py" % allDataFile)
         
     allDataParams, allImages = pkl.load(open(allDataFile, 'rb'))
+  
     dataParamsKeys = list(allDataParams.keys())
     dataParamsKeys.append("images")            
 
     
-    
+    allDataParams['binning'] = np.zeros(len(allImages))+binning
     
     #Check the sims
     data_class_names = np.unique( allDataParams['sim'])
@@ -96,6 +99,9 @@ def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
         allImages = tf.image.resize(allImages, resize, method='nearest')
        
     images = np.stack([ allImages[:,:,:,i] for i in channel_idxs], axis=-1)
+  
+  
+   
     
     if renorm == 'mean':
         print(allImages.shape)
@@ -104,13 +110,38 @@ def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
                            for j in np.arange(allImages.shape[-1]) ])
     
     
-    for i in allDataParams.keys():
-        if i != 'lensing_norm':
-            allDataParams[i] = np.array(allDataParams[i])
+    allDataParams['galaxy_catalogues'] = np.array([ i[:galaxy_member_lim]  for i in allDataParams['galaxy_catalogues']])
+    for iCl in allDataParams['galaxy_catalogues']:
+        iCl['x'] -= 1000.
+        iCl['y'] -= 1000.
     
+    try:
+        _ = np.array(allDataParams['galaxy_catalogues'])
+    except:
+        raise ValueError("Please select subset of galaxies to created ordere array")
+                     
+    
+    for i in allDataParams.keys():
+        if i == 'galaxy_catalogues':
+            allDataParams[i] = np.array(allDataParams[i].tolist())
+        else:
+            allDataParams[i] = np.array(allDataParams[i])
+            
+    allDataParams['bcg_e'] = np.sqrt(allDataParams['BCG_e1']**2+allDataParams['BCG_e2']**2)
+    allDataParams['einstein_rad'] = get_einstein_radius(10**allDataParams['mass'])
+
+    if add_noise is not None:
+        images = add_noise_to_images( images, allDataParams, channels , noise_parameters=add_noise )
+        
     selectGalaxy = np.zeros(len(allDataParams['label']))
     
     selectGalaxy[ (allDataParams['mass'] > massCut) ] = 1
+    
+    if dynamical_state == 'relaxed':
+        selectGalaxy[ (allDataParams['xrayConc'] < 0.2) ] = 0
+    if dynamical_state == 'merging':
+        selectGalaxy[ (allDataParams['xrayConc'] > 0.2) ] = 0
+
 
     for i in simulationNames:
 
@@ -161,6 +192,7 @@ def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
         corr_arr = np.concatenate( all_corrs, axis=-1)
         
         images = np.concatenate([images, corr_arr], axis=-1)
+        
     if augment_data:
         gen = ImageDataGenerator(horizontal_flip = True,
                          vertical_flip = True,
@@ -172,12 +204,25 @@ def get_tf_DataSet( train_split = 0.8, binning = 20, allDataFile = None, \
 
     X_train, X_val, y_train, y_val = train_test_split(images, newLabels, test_size=1.-train_split, stratify=newLabels, random_state=random_state)  
     
-    train_gen = gen.flow( X_train, y_train, batch_size=batch_size )
+    index_train, index_val, _, _ =  train_test_split(np.arange(images.shape[0]), newLabels, test_size=1.-train_split, stratify=newLabels, random_state=random_state)  
+  
+    for i in meta_data:
+        assert( i in allDataParams.keys() , "Do not recognuise key %s" % i)
 
-    
-    
+    if len(meta_data) > 0:
+        train_gen = gen.flow( [X_train]+ [ np.stack([ [allDataParams[i][j] for j in index_train] for i in meta_data], axis=1)], y_train, batch_size=batch_size )
+
+        X_val = [X_val] + \
+          [ np.stack([ [allDataParams[i][j] for j in index_val] for i in meta_data], axis=1)]
+    else:
+        train_gen = gen.flow( X_train, y_train, batch_size=batch_size )
+
+        
+    # taken from 
+    #https://www.kaggle.com/code/nhm1440/image-metadata-with-keras-imagedatagenerator#7.-Preparing-for-training:-train/validation-split,-ImageDataGenerator-and-flow_from_dataframe-for-metadata-and-images
+
+                
     if return_test_params:
-        index_train, index_val, _, _ =  train_test_split(np.arange(images.shape[0]), newLabels, test_size=1.-train_split, stratify=newLabels, random_state=random_state)  
         
         for i in allDataParams.keys():
             allDataParams[i] = allDataParams[i][ index_val ]

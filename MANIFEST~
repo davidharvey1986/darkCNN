@@ -1,4 +1,3 @@
-src/#mainModel.py#
 src/__init__.py
 src/augmentData.py
 src/getSIDMdata.py
@@ -8,6 +7,3 @@ src/main.py
 src/mainModel.py
 src/model_helpers.py
 src/tools.py
-
-src/__pycache__:
-inceptionModules.cpython-310.pyc
