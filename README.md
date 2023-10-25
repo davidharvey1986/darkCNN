@@ -87,6 +87,8 @@ A few words on the data
 -----------------------
 
 >> params, images = pkl.load(open(data, "rb"))
+
+
 params is a dict
 images is a list
 
