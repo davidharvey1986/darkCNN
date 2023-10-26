@@ -2,7 +2,6 @@ from sklearn.metrics import confusion_matrix
 import numpy as np
 from matplotlib import pyplot as plt
 
-import tensorflow as tf
 import os
 
 from .globalVariables import *

@@ -13,10 +13,10 @@ parser.add_argument('-f','--fileRootName', help='fileRootName', default=None, ty
 parser.add_argument('-m','--nMonteCarlo', help='nMonteCarlo', default=5, type=int)
 parser.add_argument('-c','--channels', help='Channels in a string separated by commas',
                     default=['total'], nargs="*", type=str)
-parser.add_argument('-o','--dropOut', help='dropOut', default=0.2, type=float)
+parser.add_argument('-o','--model_name', help='model_name', default='inception', type=str)
 parser.add_argument('-t','--train_split', help='train_split', default=0.85, type=float)
 parser.add_argument('-a','--attributes', help='Attributes in a string separated by commas',
-                    default=[], nargs='*', type=str)
+                    default=['bcg_e'], nargs='*', type=str)
 
 
 args = parser.parse_args()
@@ -26,6 +26,6 @@ darkCNN.main(  nEpochs=args.nEpochs, \
                fileRootName=args.fileRootName, \
                database=args.database, \
                nMonteCarlo=args.nMonteCarlo, \
-               dropout=args.dropOut, \
+               model_name=args.model_name, \
                channels=args.channels, \
                attributes=args.attributes)

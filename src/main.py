@@ -4,8 +4,9 @@ from .globalVariables import *
 
 
 def main( nEpochs=60, train_split=0.8,\
-          fileRootName=None, database=None, attributes=['redshift','mass'], \
-          nMonteCarlo=5, dropout=0.2, channels=['total','stellar']):
+          fileRootName=None, database=None, 
+         model_name='simple', attributes=['bcg_e'], \
+          nMonteCarlo=5, channels=['total','stellar']):
     '''
     The main function that trains the model 
     
@@ -28,32 +29,36 @@ def main( nEpochs=60, train_split=0.8,\
     if not os.path.isdir("pickles"):
         os.system("mkdir pickles")
     
-    if fileRootName is None:
-        #fileRootName = "pickles/augmentedTrain_%i_channel_noAtt_dropout_%0.1f_testSplit_%0.3f" % \
-        #(nChannels,dropout,testTrainSplit)
-        
-        fileRootName = "pickles/merten_arch"
+    if fileRootName is None: 
+        fileRootName = "pickles/%s_arch" % model_name
         
         
+    if database is None:
+        database = 'exampleCNN.pkl'
         
     print("All files saved to %s" % fileRootName)  
     print("Using attributes: ", attributes)
+    
+    accuracy = []
     for iMonteCarlo in range(1, nMonteCarlo+1):
         train, test, params = getData(augment_data=True, simulationNames=simulationNames, 
-                                                      channels=channels, train_split=0.01,
-                                                      allDataFile='pickles/binned_data_20.pkl', 
+                                                      channels=channels, train_split=train_split,
+                                                      allDataFile=database, 
                                                       random_state=iMonteCarlo, return_test_params=True, 
-                                                      meta_data=['bcg_e'], add_noise=these_noise)
+                                                      meta_data=['bcg_e'])
          
         checkpoint_filepath = '%s_%i' % (fileRootName, iMonteCarlo)
   
-        model_name = get_best_model( train, test, base_cnn_input_shape=test[0][0][0].shape, \
+        model = get_best_model( train, test, base_cnn_input_shape=test[0][0][0].shape, \
                                     model_name=model_name, 
                                    checkpoint_filepath=checkpoint_filepath, \
-                                    epochs=epochs, meta=['bcg_e'])    
+                                    epochs=nEpochs, meta=attributes)    
     
         accuracy.append(model.evaluate(test[0],test[1])[1])
-        
+    
+    plt.hist(accuracy)
+    plt.savefig('accuracy_%s.pdf' % model_name)
+    plt.show()
 if __name__ == '__main__':
     main()
     
